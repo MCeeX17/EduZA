@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="EduZA myportal — school management portal for South African primary, high and combined schools.">
+  <meta name="theme-color" content="#0A4C9A">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="EduZA">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="manifest" href="manifest.json">
+  <title>EduZA myportal</title>
+  <style>
+    html,body{margin:0;height:100%;background:#fff;}
+    #boot{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#fff;font-family:Roboto,Arial,sans-serif;color:#0C3974;transition:opacity .3s;}
+    #boot img{width:96px;height:96px;}
+    #boot .bar{width:140px;height:4px;border-radius:4px;background:#e6eef6;overflow:hidden;}
+    #boot .bar:after{content:"";display:block;width:40%;height:100%;background:linear-gradient(90deg,#0A4C9A,#1E8E6A);border-radius:4px;animation:slide 1.1s infinite ease-in-out;}
+    @keyframes slide{0%{margin-left:-40%}100%{margin-left:100%}}
+
+    /* ── "Install the app" prompt (PWA) ───────────────────────────── */
+    #eduza-install[hidden]{display:none}
+    #eduza-install{position:fixed;z-index:2147483000;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));
+      max-width:430px;margin:0 auto;box-sizing:border-box;padding:14px 14px 14px 14px;border-radius:22px;
+      background:#fff;color:#0F1F33;border:1px solid #DCE5EE;font-family:Roboto,Arial,sans-serif;
+      box-shadow:0 18px 50px rgba(10,76,154,.28),0 2px 8px rgba(15,31,51,.08);
+      opacity:0;transform:translateY(24px) scale(.98);transition:opacity .35s ease,transform .35s cubic-bezier(.2,.8,.2,1);}
+    #eduza-install.show{opacity:1;transform:none}
+    #eduza-install .row{display:flex;align-items:center;gap:12px}
+    #eduza-install img{width:48px;height:48px;border-radius:14px;flex:none;box-shadow:0 4px 14px rgba(0,0,0,.14)}
+    #eduza-install .txt{flex:1;min-width:0;line-height:1.3}
+    #eduza-install .txt strong{display:block;font-size:15px;font-weight:800;letter-spacing:-.1px}
+    #eduza-install .txt span{display:block;font-size:12.5px;color:#5B6B7F;margin-top:2px}
+    #eduza-install .btns{display:flex;gap:8px;margin-top:12px;justify-content:flex-end;align-items:center}
+    #eduza-install button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:10px 16px;font-size:13.5px;font-weight:700}
+    #eduza-install .go{color:#fff;background:linear-gradient(135deg,#0A4C9A,#1E8E6A);box-shadow:0 6px 16px rgba(10,76,154,.35)}
+    #eduza-install .later{background:transparent;color:#5B6B7F}
+    #eduza-install .later:hover{background:rgba(10,76,154,.08)}
+    #eduza-install .steps{margin:12px 0 0;padding:10px 12px;border-radius:14px;background:#F1F5FC;font-size:12.5px;line-height:1.5;color:#33465c}
+    #eduza-install .steps b{color:#0A4C9A}
+    @media (min-width:720px){#eduza-install{left:auto;right:24px;bottom:24px;margin:0}}
+    @media (prefers-color-scheme:dark){
+      #eduza-install{background:#12233D;color:#F2F6FB;border-color:#26395A;box-shadow:0 18px 50px rgba(0,0,0,.55)}
+      #eduza-install .txt span{color:#9FB0C6}
+      #eduza-install .later{color:#9FB0C6}
+      #eduza-install .steps{background:#0A1628;color:#c5d2e3}
+      #eduza-install .steps b{color:#5B9BE6}
+    }
+    @media (prefers-reduced-motion:reduce){#eduza-install{transition:none}}
+  </style>
+</head>
+<body>
+  <div id="boot"><img src="icons/icon-192.png" alt="EduZA"><div class="bar"></div></div>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var b = document.getElementById('boot');
+      if (b) { b.style.opacity = 0; setTimeout(function(){ b.remove(); }, 350); }
+    });
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+
+  <!-- Install-the-app prompt. Shown on phones AND PCs whenever the app is opened in a
+       browser tab (never once it is installed / running as the installed app). -->
+  <div id="eduza-install" role="dialog" aria-label="Install EduZA myportal" hidden>
+    <div class="row">
+      <img src="icons/icon-192.png" alt="">
+      <div class="txt">
+        <strong>Install EduZA myportal</strong>
+        <span id="eduza-install-sub">Add it to your device for one-tap access, a full-screen app and faster loading.</span>
+      </div>
+    </div>
+    <div id="eduza-install-steps" class="steps" hidden></div>
+    <div class="btns">
+      <button type="button" class="later" id="eduza-install-later">Not now</button>
+      <button type="button" class="go" id="eduza-install-go">Install app</button>
+    </div>
+  </div>
+  <script>
+  (function () {
+    var KEY = 'eduza_install_snooze_until';
+    var card = document.getElementById('eduza-install');
+    var goBtn = document.getElementById('eduza-install-go');
+    var laterBtn = document.getElementById('eduza-install-later');
+    var steps = document.getElementById('eduza-install-steps');
+    var sub = document.getElementById('eduza-install-sub');
+    var deferred = null, installed = false, shown = false, manualOpen = false;
+
+    var ua = navigator.userAgent || '';
+    var isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var isAndroid = /android/i.test(ua);
+    var isFirefox = /firefox|fxios/i.test(ua) && !isIOS;
+    var isSafariMac = !isIOS && /safari/i.test(ua) && !/chrome|chromium|crios|edg|android/i.test(ua);
+
+    function standalone() {
+      try {
+        return window.matchMedia('(display-mode: standalone)').matches ||
+               window.matchMedia('(display-mode: fullscreen)').matches ||
+               window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+               window.navigator.standalone === true;
+      } catch (e) { return false; }
+    }
+    function snoozed() { try { return Date.now() < Number(localStorage.getItem(KEY) || 0); } catch (e) { return false; } }
+    function snooze(days) { try { localStorage.setItem(KEY, String(Date.now() + days * 864e5)); } catch (e) {} }
+
+    function show() {
+      if (shown || installed || standalone() || snoozed()) return;
+      shown = true;
+      card.hidden = false;
+      requestAnimationFrame(function () { requestAnimationFrame(function () { card.classList.add('show'); }); });
+    }
+    function hide() {
+      card.classList.remove('show');
+      setTimeout(function () { card.hidden = true; shown = false; }, 380);
+    }
+
+    function manualText() {
+      if (isIOS) return 'Tap the <b>Share</b> button in Safari, then choose <b>Add to Home Screen</b>.';
+      if (isAndroid) return 'Open the browser menu <b>\u22EE</b>, then tap <b>Install app</b> or <b>Add to Home screen</b>.';
+      if (isFirefox) return 'Firefox can\u2019t install web apps on computers. Open EduZA myportal in <b>Chrome</b> or <b>Edge</b> to install it.';
+      if (isSafariMac) return 'In Safari choose <b>File \u2192 Add to Dock</b>.';
+      return 'Click the <b>install icon</b> at the right of the address bar, or open the browser menu <b>\u22EE</b> and choose <b>Install EduZA myportal</b>.';
+    }
+
+    // Chrome / Edge / Samsung Internet / Opera: the real one-click install.
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferred = e;
+      if (manualOpen) { manualOpen = false; steps.hidden = true; goBtn.textContent = 'Install app'; }
+      show();
+    });
+
+    window.addEventListener('appinstalled', function () {
+      installed = true; deferred = null; snooze(365); hide();
+    });
+
+    goBtn.addEventListener('click', function () {
+      if (deferred) {
+        var d = deferred; deferred = null;
+        d.prompt();
+        if (d.userChoice) d.userChoice.then(function (c) {
+          if (c && c.outcome === 'accepted') { installed = true; hide(); }
+          else { snooze(1); hide(); }
+        });
+      } else if (!manualOpen) {
+        // Browsers with no install event (iOS Safari, Firefox, ...): show how to do it by hand.
+        manualOpen = true;
+        steps.innerHTML = manualText();
+        steps.hidden = false;
+        goBtn.textContent = 'Got it';
+      } else {
+        snooze(1); hide();
+      }
+    });
+    laterBtn.addEventListener('click', function () { snooze(1); hide(); });
+
+    // If the browser never fires the install event (iOS, Firefox, already-seen, ...) still tell
+    // the person how to install, so the prompt appears on every phone and PC.
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        if (!deferred) { sub.textContent = 'Add it to your home screen / desktop for one-tap access and a full-screen app.'; }
+        show();
+      }, 3500);
+    });
+
+    // Lets the app (or a menu item) re-open the prompt later: window.eduzaShowInstall()
+    window.eduzaShowInstall = function () { try { localStorage.removeItem(KEY); } catch (e) {} shown = false; show(); };
+  })();
+  </script>
+</body>
+</html>
